@@ -3,15 +3,15 @@ using UnityEngine;
 [RequireComponent(typeof(AudioSource))]
 public class AmbientSoundSet : MonoBehaviour
 {
-    public float volume = 0.16f;
+    public float volume = 0.28f;
     public float duration = 6f;
     public int sampleRate = 44100;
 
     private void Awake()
     {
-        CreateAudioLayer(90f, 0.08f, 0f);
-        CreateAudioLayer(125f, 0.06f, 0f);
-        CreateAudioLayer(180f, 0.05f, 0f);
+        CreateAudioLayer(80f, 0.16f, -0.2f);
+        CreateAudioLayer(120f, 0.12f, 0.2f);
+        CreateAudioLayer(180f, 0.1f, 0f);
     }
 
     private void CreateAudioLayer(float frequency, float amplitude, float pan)
@@ -26,6 +26,8 @@ public class AmbientSoundSet : MonoBehaviour
         source.playOnAwake = true;
         source.spatialBlend = 0f;
         source.panStereo = pan;
+        source.bypassEffects = true;
+        source.bypassReverbZones = true;
         source.Play();
     }
 

@@ -4,7 +4,7 @@ using UnityEngine;
 public class PortalAmbientSound : MonoBehaviour
 {
     public float frequency = 220f;
-    public float volume = 0.18f;
+    public float volume = 0.42f;
     public float duration = 2f;
     public int sampleRate = 44100;
 
@@ -16,6 +16,8 @@ public class PortalAmbientSound : MonoBehaviour
         audioSource.playOnAwake = true;
         audioSource.spatialBlend = 0f;
         audioSource.volume = volume;
+        audioSource.bypassEffects = true;
+        audioSource.bypassReverbZones = true;
         audioSource.Play();
     }
 
