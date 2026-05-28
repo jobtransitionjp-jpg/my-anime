@@ -59,6 +59,9 @@ public static class WorldBuilderMenu
             Debug.Log("オブジェクト 'Isekai Auto Setup' を作成しました。このオブジェクトはシーン起動時に自動的に世界を生成します。");
         }
 
+        // Immediately create the world and audio in edit mode as well.
+        CreateVirtualSpace();
+
         EditorSceneManager.MarkSceneDirty(setupObject.scene);
     }
 }
