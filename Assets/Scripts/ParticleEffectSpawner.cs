@@ -15,11 +15,18 @@ public class ParticleEffectSpawner : MonoBehaviour
         ParticleSystem ps = particleSystem.AddComponent<ParticleSystem>();
         ParticleSystemRenderer renderer = particleSystem.GetComponent<ParticleSystemRenderer>();
 
-        ps.maxParticles = particleCount;
-        ps.startSpeed = new ParticleSystem.MinMaxCurve(0.5f, 2f);
-        ps.startSize = new ParticleSystem.MinMaxCurve(0.1f, 0.3f);
-        ps.startLifetime = new ParticleSystem.MinMaxCurve(3f, 6f);
-        ps.startColor = new ParticleSystem.MinMaxGradient(particleColor);
+        var main = ps.main;
+        main.maxParticles = particleCount;
+        main.startSpeed = new ParticleSystem.MinMaxCurve(0.5f, 2f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.1f, 0.3f);
+        main.startLifetime = new ParticleSystem.MinMaxCurve(3f, 6f);
+        main.startColor = new ParticleSystem.MinMaxGradient(particleColor);
+        main.loop = true;
+        main.playOnAwake = true;
+
+        var emission = ps.emission;
+        emission.enabled = true;
+        emission.rateOverTime = 25f;
 
         var shape = ps.shape;
         shape.enabled = true;
