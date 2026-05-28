@@ -14,8 +14,9 @@
 3. Unityメニューから `Tools > Isekai Virtual World > Complete Setup (World + Particles + Camera)` を選択します。
    - これにより、世界生成、パーティクル、カメラ、サウンド、異世界スカイボックスがすべてセットアップされます。
 4. `Tools > Isekai Virtual World > Ensure Main Camera` を実行して、`Main Camera` と `AudioListener` を確実に作成します。
-5. `File > Save` でシーンを保存します。
-6. `Play` を押して、異世界空間を確認します。
+5. `Tools > Isekai Virtual World > Create Final Isekai Scene` を実行して、`Assets/Scenes/FinalIsekaiScene.unity` を保存します。
+6. `File > Save` でシーンを保存します。
+7. `Play` を押して、異世界空間を確認します。
 
 ## 追加メニュー
 - `Tools > Isekai Virtual World > Create Virtual Space`

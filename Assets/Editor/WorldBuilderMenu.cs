@@ -1,6 +1,8 @@
+using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public static class WorldBuilderMenu
 {
@@ -63,5 +65,54 @@ public static class WorldBuilderMenu
         CreateVirtualSpace();
 
         EditorSceneManager.MarkSceneDirty(setupObject.scene);
+    }
+
+    [MenuItem("Tools/Isekai Virtual World/Create Final Isekai Scene")]
+    private static void CreateFinalIsekaiScene()
+    {
+        CreateVirtualSpace();
+        EnsureMainCameraItem();
+
+        string sceneFolder = "Assets/Scenes";
+        if (!Directory.Exists(sceneFolder))
+            Directory.CreateDirectory(sceneFolder);
+
+        string finalScenePath = Path.Combine(sceneFolder, "FinalIsekaiScene.unity");
+        SceneAsset existingScene = AssetDatabase.LoadAssetAtPath<SceneAsset>(finalScenePath);
+
+        if (existingScene != null)
+        {
+            Debug.Log("FinalIsekaiScene.unity を上書き保存します。");
+        }
+        else
+        {
+            Debug.Log("FinalIsekaiScene.unity を作成して保存します。");
+        }
+
+        Scene currentScene = EditorSceneManager.GetActiveScene();
+        EditorSceneManager.SaveScene(currentScene, finalScenePath);
+        AssetDatabase.Refresh();
+
+        Debug.Log("Final Isekai Scene を保存しました: " + finalScenePath);
+    }
+
+    private static void EnsureMainCameraItem()
+    {
+        Camera camera = Camera.main;
+        if (camera == null)
+        {
+            GameObject cameraObject = new GameObject("Main Camera");
+            cameraObject.tag = "MainCamera";
+            camera = cameraObject.AddComponent<Camera>();
+            cameraObject.AddComponent<AudioListener>();
+            camera.transform.position = new Vector3(-30f, 18f, -24f);
+            camera.transform.rotation = Quaternion.Euler(20f, 35f, 0f);
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = RenderSettings.fog ? RenderSettings.fogColor : new Color(0.03f, 0.02f, 0.05f);
+        }
+        else if (camera.gameObject.GetComponent<AudioListener>() == null)
+        {
+            camera.gameObject.AddComponent<AudioListener>();
+        }
     }
 }
