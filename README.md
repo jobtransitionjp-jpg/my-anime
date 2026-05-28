@@ -25,6 +25,18 @@
   - シーン起動時に自動生成する `Isekai Auto Setup` を作成し、すぐに世界を生成します。
 - `Tools > Isekai Virtual World > Ensure Main Camera`
   - `Main Camera` と `AudioListener` を強制的に作成します。
+- `Tools > Isekai Virtual World > Create Final Isekai Scene`
+  - `Assets/Scenes/FinalIsekaiScene.unity` を保存し、ビルド用シーンを作成します。
+- `Tools > Isekai Virtual World > Configure Build Settings`
+  - ビルド設定を `FinalIsekaiScene` に切り替えます。
+- `Tools > Isekai Virtual World > Build Standalone OSX`
+  - macOS用のビルドを `Build/Standalone/FinalIsekai.app` に作成します。
+- `Tools > Isekai Virtual World > Build Standalone Windows64`
+  - Windows 64bit 用のビルドを `Build/Standalone/FinalIsekai.exe` に作成します。
+
+## BGM について
+- 外部BGMファイルは `Assets/Resources/BGM.wav` にあります。
+- `Create Final Isekai Scene` 実行時にBGMが読み込まれ、再生されます。
 
 ## 注意点
 - このプロジェクトは現在 GitHub に接続済みです。最新の変更はリモート `origin` にプッシュされています。

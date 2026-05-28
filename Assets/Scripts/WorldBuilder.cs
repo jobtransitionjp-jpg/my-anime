@@ -31,6 +31,8 @@ public class WorldBuilder : MonoBehaviour
         SetupLighting();
         SetupFog();
         CreateSkybox();
+        CreateBGM(root.transform);
+        CreateUI(root.transform);
         CreateAmbientAudio(root.transform);
         SetupCamera();
     }
@@ -100,6 +102,7 @@ public class WorldBuilder : MonoBehaviour
             islandRenderer.sharedMaterial = islandMaterial;
             island.AddComponent<FloatingIslandMotion>();
             CreateIslandDetail(island.transform, scale);
+            CreateIslandGlow(island.transform, scale);
         }
     }
 
@@ -194,13 +197,43 @@ public class WorldBuilder : MonoBehaviour
             return;
 
         Material skyboxMaterial = new Material(skyboxShader);
-        skyboxMaterial.SetColor("_SkyTint", new Color(0.18f, 0.08f, 0.25f));
-        skyboxMaterial.SetColor("_GroundColor", new Color(0.05f, 0.02f, 0.12f));
+        skyboxMaterial.SetColor("_SkyTint", new Color(0.18f, 0.08f, 0.35f));
+        skyboxMaterial.SetColor("_GroundColor", new Color(0.04f, 0.01f, 0.1f));
         skyboxMaterial.SetColor("_SunTint", new Color(0.95f, 0.7f, 1f));
-        skyboxMaterial.SetFloat("_Exposure", 1.1f);
-        skyboxMaterial.SetFloat("_AtmosphereThickness", 0.8f);
+        skyboxMaterial.SetFloat("_Exposure", 1.05f);
+        skyboxMaterial.SetFloat("_AtmosphereThickness", 0.9f);
         skyboxMaterial.SetFloat("_GroundEmission", 0.2f);
         RenderSettings.skybox = skyboxMaterial;
+    }
+
+    private void CreateBGM(Transform parent)
+    {
+        GameObject bgmObject = new GameObject("Isekai BGM");
+        bgmObject.transform.parent = parent;
+        bgmObject.transform.localPosition = Vector3.zero;
+        bgmObject.AddComponent<BGMPlayer>();
+    }
+
+    private void CreateUI(Transform parent)
+    {
+        GameObject uiObject = new GameObject("Isekai UI Root");
+        uiObject.transform.parent = parent;
+        uiObject.transform.localPosition = Vector3.zero;
+        uiObject.AddComponent<UIManager>();
+    }
+
+    private void CreateIslandGlow(Transform parent, float scale)
+    {
+        GameObject glow = new GameObject("Island Glow");
+        glow.transform.parent = parent;
+        glow.transform.localPosition = new Vector3(0f, -0.15f, 0f);
+
+        Light pointLight = glow.AddComponent<Light>();
+        pointLight.type = LightType.Point;
+        pointLight.range = scale * 2.5f;
+        pointLight.intensity = 1.3f;
+        pointLight.color = new Color(0.4f, 0.7f, 1f);
+        pointLight.shadows = LightShadows.Soft;
     }
 
     private void CreateAmbientAudio(Transform parent)
