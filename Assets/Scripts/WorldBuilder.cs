@@ -219,7 +219,15 @@ public class WorldBuilder : MonoBehaviour
             GameObject cameraObject = new GameObject("Main Camera");
             camera = cameraObject.AddComponent<Camera>();
             cameraObject.AddComponent<AudioListener>();
-            camera.tag = "MainCamera";
+            cameraObject.tag = "MainCamera";
+        }
+        else
+        {
+            AudioListener existingListener = camera.gameObject.GetComponent<AudioListener>();
+            if (existingListener == null)
+            {
+                camera.gameObject.AddComponent<AudioListener>();
+            }
         }
 
         camera.transform.position = cameraPosition;
