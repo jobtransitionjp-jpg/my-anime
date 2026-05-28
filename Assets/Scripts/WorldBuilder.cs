@@ -30,6 +30,8 @@ public class WorldBuilder : MonoBehaviour
         CreatePortal(root.transform);
         SetupLighting();
         SetupFog();
+        CreateSkybox();
+        CreateAmbientAudio(root.transform);
         SetupCamera();
     }
 
@@ -53,8 +55,11 @@ public class WorldBuilder : MonoBehaviour
         ground.transform.parent = parent;
         ground.transform.localPosition = Vector3.zero;
         ground.transform.localRotation = Quaternion.identity;
-        ground.transform.localScale = new Vector3(10f, 1f, 10f);
-        SetColor(ground, groundColor);
+        ground.transform.localScale = new Vector3(12f, 1f, 12f);
+
+        Material groundMaterial = CreateSurfaceMaterial(groundColor, new Color(0.08f, 0.12f, 0.06f));
+        Renderer renderer = ground.GetComponent<Renderer>();
+        renderer.sharedMaterial = groundMaterial;
     }
 
     private void CreateFloatingIslands(Transform parent)
@@ -90,7 +95,9 @@ public class WorldBuilder : MonoBehaviour
                 island.transform.localScale = new Vector3(scale, scale * 0.35f, scale);
             }
 
-            SetColor(island, islandColor);
+            Material islandMaterial = CreateSurfaceMaterial(islandColor, new Color(0.18f, 0.12f, 0.08f));
+            Renderer islandRenderer = island.GetComponent<Renderer>();
+            islandRenderer.sharedMaterial = islandMaterial;
             island.AddComponent<FloatingIslandMotion>();
             CreateIslandDetail(island.transform, scale);
         }
@@ -140,7 +147,7 @@ public class WorldBuilder : MonoBehaviour
 
         CreatePortalRing(portalRoot.transform);
         portalRoot.AddComponent<PortalAnimator>().portalColor = portalColor;
-        AudioSource audioSource = portalRoot.AddComponent<AudioSource>();
+        portalRoot.AddComponent<SpiritParticleSpawner>().SpawnSpiritParticles();
         portalRoot.AddComponent<PortalAmbientSound>();
     }
 
@@ -180,6 +187,30 @@ public class WorldBuilder : MonoBehaviour
         RenderSettings.fogDensity = 0.008f;
     }
 
+    private void CreateSkybox()
+    {
+        Shader skyboxShader = Shader.Find("Skybox/Procedural");
+        if (skyboxShader == null)
+            return;
+
+        Material skyboxMaterial = new Material(skyboxShader);
+        skyboxMaterial.SetColor("_SkyTint", new Color(0.18f, 0.08f, 0.25f));
+        skyboxMaterial.SetColor("_GroundColor", new Color(0.05f, 0.02f, 0.12f));
+        skyboxMaterial.SetColor("_SunTint", new Color(0.95f, 0.7f, 1f));
+        skyboxMaterial.SetFloat("_Exposure", 1.1f);
+        skyboxMaterial.SetFloat("_AtmosphereThickness", 0.8f);
+        skyboxMaterial.SetFloat("_GroundEmission", 0.2f);
+        RenderSettings.skybox = skyboxMaterial;
+    }
+
+    private void CreateAmbientAudio(Transform parent)
+    {
+        GameObject audioObject = new GameObject("Isekai Ambient Audio");
+        audioObject.transform.parent = parent;
+        audioObject.transform.localPosition = Vector3.zero;
+        audioObject.AddComponent<AmbientSoundSet>();
+    }
+
     private void SetupCamera()
     {
         Camera camera = Camera.main;
@@ -196,6 +227,41 @@ public class WorldBuilder : MonoBehaviour
         camera.clearFlags = CameraClearFlags.SolidColor;
         camera.backgroundColor = fogColor;
         camera.farClipPlane = 250f;
+    }
+
+    private Material CreateSurfaceMaterial(Color baseColor, Color detailColor)
+    {
+        Material material = new Material(Shader.Find("Standard"));
+        material.color = baseColor;
+        material.EnableKeyword("_EMISSION");
+        material.SetColor("_EmissionColor", detailColor * 0.25f);
+        material.SetFloat("_Glossiness", 0.35f);
+        material.SetTexture("_MainTex", GenerateNoiseTexture(baseColor, detailColor));
+        return material;
+    }
+
+    private Texture2D GenerateNoiseTexture(Color baseColor, Color detailColor)
+    {
+        int size = 256;
+        Texture2D texture = new Texture2D(size, size, TextureFormat.ARGB32, false);
+        texture.wrapMode = TextureWrapMode.Repeat;
+
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                float noise = Mathf.PerlinNoise(x * 0.08f, y * 0.08f);
+                float lerp = Mathf.Pow(noise, 1.5f);
+                Color pixel = Color.Lerp(baseColor, detailColor, lerp);
+                float variation = Mathf.PerlinNoise(x * 0.14f, y * 0.14f) * 0.12f;
+                pixel += new Color(variation, variation, variation, 0f);
+                pixel.a = 1f;
+                texture.SetPixel(x, y, pixel);
+            }
+        }
+
+        texture.Apply();
+        return texture;
     }
 
     private void SetColor(GameObject obj, Color color)
