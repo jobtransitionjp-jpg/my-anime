@@ -59,26 +59,39 @@ public class WorldBuilder : MonoBehaviour
 
     private void CreateFloatingIslands(Transform parent)
     {
-        Random.InitState(20260528);
-
         for (int i = 0; i < islandCount; i++)
         {
             float angle = i * Mathf.PI * 2f / islandCount;
             float radius = Random.Range(islandMinDistance, islandMaxDistance);
             float height = Random.Range(islandMinHeight, islandMaxHeight);
             float scale = Random.Range(islandMinScale, islandMaxScale);
+            int primitiveIndex = Random.Range(0, 3);
 
             Vector3 position = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radius;
             position.y = height;
 
-            GameObject island = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            PrimitiveType type = primitiveIndex == 0 ? PrimitiveType.Cylinder : primitiveIndex == 1 ? PrimitiveType.Sphere : PrimitiveType.Cube;
+            GameObject island = GameObject.CreatePrimitive(type);
             island.name = "Floating Island " + (i + 1);
             island.transform.parent = parent;
             island.transform.position = position;
-            island.transform.localScale = new Vector3(scale, scale * 0.35f, scale);
             island.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
-            SetColor(island, islandColor);
 
+            if (type == PrimitiveType.Cube)
+            {
+                island.transform.localScale = new Vector3(scale * 1.2f, scale * 0.25f, scale * 1.2f);
+            }
+            else if (type == PrimitiveType.Sphere)
+            {
+                island.transform.localScale = new Vector3(scale * 1.1f, scale * 0.4f, scale * 1.1f);
+            }
+            else
+            {
+                island.transform.localScale = new Vector3(scale, scale * 0.35f, scale);
+            }
+
+            SetColor(island, islandColor);
+            island.AddComponent<FloatingIslandMotion>();
             CreateIslandDetail(island.transform, scale);
         }
     }
@@ -95,10 +108,16 @@ public class WorldBuilder : MonoBehaviour
 
     private void CreatePortal(Transform parent)
     {
+        GameObject portalRoot = new GameObject("Isekai Portal Group");
+        portalRoot.transform.parent = parent;
+        portalRoot.transform.localPosition = new Vector3(0f, 8f, 18f);
+        portalRoot.transform.localRotation = Quaternion.identity;
+        portalRoot.transform.localScale = Vector3.one;
+
         GameObject portal = GameObject.CreatePrimitive(PrimitiveType.Quad);
         portal.name = "Isekai Portal";
-        portal.transform.parent = parent;
-        portal.transform.localPosition = new Vector3(0f, 8f, 18f);
+        portal.transform.parent = portalRoot.transform;
+        portal.transform.localPosition = Vector3.zero;
         portal.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
         portal.transform.localScale = new Vector3(10f, 14f, 1f);
 
@@ -108,9 +127,21 @@ public class WorldBuilder : MonoBehaviour
         portalMaterial.EnableKeyword("_EMISSION");
         portalMaterial.SetColor("_EmissionColor", portalColor * 2f);
         portalMaterial.SetFloat("_Glossiness", 0.9f);
+        portalMaterial.SetFloat("_Mode", 3f);
+        portalMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        portalMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        portalMaterial.SetInt("_ZWrite", 0);
+        portalMaterial.DisableKeyword("_ALPHATEST_ON");
+        portalMaterial.EnableKeyword("_ALPHABLEND_ON");
+        portalMaterial.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+        portalMaterial.renderQueue = 3000;
+        portalMaterial.color = new Color(portalColor.r, portalColor.g, portalColor.b, 0.85f);
         renderer.sharedMaterial = portalMaterial;
 
-        CreatePortalRing(parent);
+        CreatePortalRing(portalRoot.transform);
+        portalRoot.AddComponent<PortalAnimator>().portalColor = portalColor;
+        AudioSource audioSource = portalRoot.AddComponent<AudioSource>();
+        portalRoot.AddComponent<PortalAmbientSound>();
     }
 
     private void CreatePortalRing(Transform parent)
@@ -118,7 +149,7 @@ public class WorldBuilder : MonoBehaviour
         GameObject ring = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         ring.name = "Portal Ring";
         ring.transform.parent = parent;
-        ring.transform.localPosition = new Vector3(0f, 8f, 18f);
+        ring.transform.localPosition = Vector3.zero;
         ring.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
         ring.transform.localScale = new Vector3(4.5f, 0.15f, 4.5f);
         SetColor(ring, portalColor * 0.8f);
